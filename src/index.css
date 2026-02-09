@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Ép buộc nền trắng và chữ đen cho toàn bộ trang web */
+body {
+  background-color: #f9f9f9 !important; /* Dấu !important để ghi đè mọi thứ khác */
+  color: #0f0f0f !important;
+}
+
+/* Fix lỗi thanh cuộn */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
