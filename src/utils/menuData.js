@@ -1,4 +1,4 @@
-import { Home, Compass, Clock, Bookmark, Flame, Lightbulb, BookOpen } from 'lucide-react';
+import { Home, Compass, Clock, Bookmark, Flame, Lightbulb, BookOpen, Briefcase } from 'lucide-react';
 
 export const sidebarItems = [
   {
@@ -7,6 +7,7 @@ export const sidebarItems = [
       { icon: Home, label: "Trang chủ", active: true },
       { icon: Compass, label: "Khám phá" },
       { icon: Clock, label: "Đọc gần đây" },
+      { icon: Briefcase, label: "Portfolio", active: false,path: "/portfolio"},
     ]
   },
   {

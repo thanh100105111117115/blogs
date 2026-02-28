@@ -1,7 +1,9 @@
 import { sidebarItems } from "@/utils/menuData";
+import { useNavigate } from "react-router-dom";
 
 // 1. Nhận props isOpen từ MainLayout
 export default function Sidebar({ isOpen }) {
+  const navigate = useNavigate();
   return (
     <aside 
       className={`
@@ -29,6 +31,7 @@ export default function Sidebar({ isOpen }) {
               return (
                 <div 
                   key={itemIndex}
+                  onClick={() => navigate(item.path)} // <-- THÊM DÒNG NÀY ĐỂ BẤM CHUYỂN TRANG
                   className={`
                     flex items-center rounded-lg cursor-pointer transition-all duration-200
                     ${isOpen ? "gap-5 px-3 py-3" : "flex-col justify-center gap-1 py-4 px-0"} 

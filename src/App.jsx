@@ -1,14 +1,18 @@
 ﻿import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { BrowserRouter, Routes, Route, Link, useParams, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useParams, useNavigate, useLocation } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import frontMatter from 'front-matter'; 
-import { Menu, Search, Video, X, ChevronLeft, Home, ThumbsUp, Moon, Sun, Bookmark, Hash, Facebook, Github, Youtube, Globe, Heart, MessageCircle, Share2, MoreHorizontal } from 'lucide-react';
+import { Menu, Search, Video, X, ChevronLeft, ThumbsUp, Moon, Sun, Bookmark, Hash, Facebook, Github, Youtube, Globe, Heart, MessageCircle, Share2, MoreHorizontal, Briefcase,Home, 
+  Mail, 
+  Instagram, 
+  Phone,  } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 // --- IMPORT FONTS (Thêm vào đầu file để load font từ Google) ---
 // --- 1. CẤU HÌNH FONT CHỮ (BẠN SỬA Ở ĐÂY) ---
 // --- 1. CẤU HÌNH FONT & CSS RESPONSIVE ---
+
 const FontStyles = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Work+Sans:wght@300;400;500;600;700&display=swap');
@@ -32,6 +36,7 @@ const FontStyles = () => (
     }
   `}</style>
 );
+
 // --- CẤU HÌNH MÀU SẮC (THEME TIM FERRISS STYLE) ---
 const themes = {
   dark: {
@@ -72,7 +77,8 @@ const calculateReadTime = (text) => {
 
 // --- DATA LOADER ---
 const mdModules = import.meta.glob('/src/posts/*.md', { as: 'raw', eager: true });
-
+// THÊM DÒNG NÀY ĐỂ ĐỌC DỰ ÁN:
+const projectModules = import.meta.glob('/src/projects/*.md', { as: 'raw', eager: true });
 // --- 1. HEADER (TIM FERRISS STYLE) ---
 const Header = ({ onSearch, searchTerm, toggleMenu, toggleTheme, isDarkMode, allTags, onSelectTag }) => {
   const navigate = useNavigate();
@@ -145,7 +151,7 @@ const Header = ({ onSearch, searchTerm, toggleMenu, toggleTheme, isDarkMode, all
                             onMouseLeave={(e) => e.target.style.background = 'white'}
                         >Tất cả bài viết</div>
                         <div style={{ height: 1, background: '#eee', margin: '4px 0' }}></div>
-                        {allTags.filter(t => t !== 'All').map(tag => (
+                        {allTags?.filter(t => t !== 'All').map(tag => (
                             <div key={tag} onClick={() => { onSelectTag(tag); navigate('/'); }}
                                 style={{ padding: '10px 24px', color: '#333', fontSize: '15px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
                                 onMouseEnter={(e) => {e.target.style.background = '#f4f4f4'; e.target.style.color = '#0e2a47'}}
@@ -223,8 +229,8 @@ const Sidebar = ({ isOpen, theme, isDarkMode, toggleTheme, allTags, selectedTag,
   return (
     <div style={{ width: '260px', background: theme.sidebarBg, height: '100%', overflowY: 'auto', padding: '16px', flexShrink: 0, borderRight: `1px solid ${theme.border}` }}>
       <div onClick={() => handleTagClick('All')} style={{...itemStyle, background: selectedTag === 'All' ? theme.hover : 'transparent', fontWeight: selectedTag === 'All' ? '600' : '400'}}><Home size={22}/> Trang chủ</div>
-      <div style={itemStyle}><ThumbsUp size={22}/> Bài viết đã thích</div>
       <div style={itemStyle}><Bookmark size={22}/> Bài viết đã lưu</div>
+      <div onClick={() => {navigate('/portfolio'); if(window.innerWidth <= 768) closeMenu();}} style={itemStyle}><Briefcase size={20} /> Portfolio</div>
       <div style={dividerStyle}></div>
       <div style={sectionTitleStyle}>Chủ đề</div>
       {allTags.filter(t => t !== 'All').map(tag => (
@@ -315,12 +321,20 @@ const HomeCard = ({ post, theme }) => (
 
 // --- 4. TRANG CHỦ (CLEAN) ---
 const HomePage = ({ posts, searchTerm, theme, selectedTag }) => {
+  
   const displayPosts = posts.filter(post => {
-    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase());
+    // 1. Dùng || "" ĐỂ BẢO VỆ NGAY TỪ ĐẦU
+    const safeTitle = post.title || "";
+    const safeSearch = searchTerm || "";
+    
+    // 2. An toàn rồi mới cho chữ nhỏ lại và đem đi so sánh
+    const matchesSearch = safeTitle.toLowerCase().includes(safeSearch.toLowerCase());
+    
+    // 3. Xử lý Tags (Đoạn này bạn không cần || "" ở cuối đâu)
     const matchesTag = selectedTag === 'All' || (post.tags && post.tags.includes(selectedTag));
+    
     return matchesSearch && matchesTag;
   });
-
   return (
     <div style={{ flex: 1, overflowY: 'auto', padding: '32px', background: theme.bg }}>
       <h2 style={{ marginBottom: '24px', color: theme.text, fontSize: '24px', fontWeight: '700', fontFamily: 'Oswald, sans-serif', borderBottom: `2px solid ${theme.border}`, paddingBottom: '12px', width: 'fit-content' }}>
@@ -465,17 +479,232 @@ const AuthorPage = ({ posts, theme }) => {
     </div>
   )
 };
+// ==========================================
+// GIAO DIỆN PORTFOLIO ĐỘC LẬP (HARITH MORGAN STYLE)
+// ==========================================
 
+// Component HarithPortfolio hoàn chỉnh và chuẩn chỉnh nhất
+
+// 1. Nhớ import thêm các icon mới: Mail, Phone, Instagram
+
+const HarithPortfolio = ({ projects }) => {
+  // Styles dùng chung để code sạch hơn
+  const sidebarWidth = '380px';
+  
+  const mainLayoutStyle = {
+    display: 'flex',
+    minHeight: '100vh',
+    backgroundColor: '#fff',
+    color: '#333',
+    fontFamily: '"Inter", sans-serif',
+  };
+
+  const sidebarStyle = {
+    width: sidebarWidth,
+    minWidth: sidebarWidth,
+    height: '100vh',
+    backgroundImage: 'url("https://harithmorgan.com/static/images/hero_img.jpg")', // Link ảnh nền thật
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    color: '#ffffff',
+    padding: '60px 40px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    textAlign: 'center',
+    position: 'sticky', // Dùng sticky thay vì fixed để không bị đè
+    top: 0,
+    overflowY: 'auto'
+  };
+
+  const contentStyle = {
+    flex: 1, // Tự động chiếm hết phần còn lại bên phải
+    padding: '80px 60px',
+    backgroundColor: '#ffffff',
+    minHeight: '100vh',
+  };
+
+  const titleStyle = {
+    fontSize: '22px',
+    color: '#999',
+    fontWeight: '400',
+    marginBottom: '40px',
+    borderBottom: '1px solid #eee',
+    paddingBottom: '10px',
+  };
+
+  return (
+    <div style={mainLayoutStyle}>
+      {/* Anchor point cho icon nhà */}
+      <div id="top"></div>
+
+      {/* CỘT TRÁI: GIỚI THIỆU */}
+      <div style={sidebarStyle}>
+        {/* Lớp mờ nền ảnh */}
+        <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(26, 26, 26, 0.8)' }}></div>
+        
+        {/* Nội dung sidebar */}
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{ width: '140px', height: '140px', borderRadius: '50%', backgroundColor: '#333', marginBottom: '30px', overflow: 'hidden', border: '2px solid #444' }}>
+              <img 
+                src="https://harithmorgan.com/static/images/harith_pfp.png" // Link ảnh thật của bạn
+                alt="Avatar" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            </div>
+            
+            <h1 style={{ fontSize: '26px', fontWeight: '600', marginBottom: '20px', lineHeight: '1.2' }}>
+              Hi, my name is Harith
+            </h1>
+            
+            <p style={{ fontSize: '15px', color: '#bbb', lineHeight: '1.7', marginBottom: '40px', textAlign: 'justify' }}>
+              I was born and raised in Brooklyn, NY. I studied Mechanical Engineering at MIT. Now I'm pursuing a Masters at Purdue. I am interested in Environmental sustainability, Product Design, and Mechatronics. Ultimately, I am searching for ways to positively impact the world.
+            </p>
+
+            <div style={{ marginTop: 'auto', display: 'flex', gap: '20px', paddingTop: '20px' }}>
+              {/* Icon nhà trỏ lên đầu trang portfolio (#top) */}
+              <a href="#top" style={{ color: '#fff' }} title="Lên đầu trang"><Home size={22} /></a>
+              <a href="mailto:harithmorgan123@gmail.com" style={{ color: '#fff' }}><Mail size={22} /></a>
+              <a href="https://www.instagram.com/harith_morgan" style={{ color: '#fff' }}><Instagram size={22} /></a>
+            </div>
+        </div>
+      </div>
+
+      {/* CỘT PHẢI: NỘI DUNG */}
+      <div style={contentStyle}>
+        {/* Phần Labs */}
+        <section style={{ marginBottom: '80px' }}>
+          <h2 style={titleStyle}>Labs</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '30px' }}>
+             {/* Box mẫu cho Labs */}
+             <div style={{ padding: '30px', border: '1px solid #f0f0f0', borderRadius: '4px', textAlign: 'center', color: '#ccc' }}>Logo Lab 1</div>
+             <div style={{ padding: '30px', border: '1px solid #f0f0f0', borderRadius: '4px', textAlign: 'center', color: '#ccc' }}>Logo Lab 2</div>
+          </div>
+        </section>
+
+        {/* Phần Projects */}
+        <section>
+          <h2 style={titleStyle}>Projects</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
+            {projects.map(p => (
+              <Link to={`/portfolio/${p.slug}`} key={p.slug} style={{ textDecoration: 'none', color: 'inherit', group: 'true' }}>
+                <div style={{ width: '100%', aspectRatio: '16/10', backgroundColor: '#f5f5f5', borderRadius: '8px', overflow: 'hidden', marginBottom: '15px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+                  <img 
+                    src={p.thumbnail} 
+                    alt={p.title} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }}
+                    onError={(e) => { e.target.src = "https://via.placeholder.com/800x500?text=Project+Image"; }}
+                  />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 style={{ fontSize: '17px', fontWeight: '600', margin: 0 }}>{p.title}</h3>
+                  <span style={{ fontSize: '14px', color: '#aaa' }}>{p.date || '2026'}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* Đường kẻ ngang ngăn cách */}
+        <hr style={{ border: 'none', borderTop: '1px solid #eee', margin: '60px 0' }} />
+
+        {/* Phần Get In Touch */}
+        <section style={{ marginBottom: '100px' }}>
+          <h2 style={{ fontSize: '24px', color: '#333', fontWeight: '400', marginBottom: '25px' }}>
+            Get In Touch
+          </h2>
+          
+          <p style={{ color: '#666', fontSize: '15px', marginBottom: '30px', lineHeight: '1.6' }}>
+            I'm still building my portfolio but if there's anything that catches your interest here please let me know.
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {/* Địa chỉ với icon nhà trang trí */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '15px' }}>
+              <Home size={20} color="#999" style={{ marginTop: '3px' }} />
+              <div style={{ color: '#888', fontSize: '14px', lineHeight: '1.8' }}>
+                1200 Happy<br />
+                Hollow Road<br />
+                West Lafayette,<br />
+                IN 47906<br />
+                United States
+              </div>
+            </div>
+
+            {/* Số điện thoại */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <div style={{ width: '20px', display: 'flex', justifyContent: 'center' }}>
+                <Phone size={20} color="#999" />
+              </div>
+              <span style={{ color: '#888', fontSize: '14px' }}>347-336-5953</span>
+            </div>
+
+            {/* Email */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <div style={{ width: '20px', display: 'flex', justifyContent: 'center' }}>
+                <Mail size={20} color="#999" />
+              </div>
+              <a href="mailto:harithmorgan123@gmail.com" style={{ color: '#888', fontSize: '14px', textDecoration: 'none', borderBottom: '1px dashed #ccc' }}>
+                harithmorgan123@gmail.com
+              </a>
+            </div>
+          </div>
+        </section>
+      </div>
+
+    </div>
+  );
+};
+const HarithProjectDetail = ({ projects }) => {
+  const { slug } = useParams();
+  const project = projects.find(p => p.slug === slug);
+
+  if (!project) return <div style={{ padding: 40, fontFamily: 'sans-serif' }}>Project not found.</div>;
+
+  return (
+    <div style={{ backgroundColor: '#ffffff', color: '#000000', minHeight: '100vh', padding: '60px 5%', fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ marginBottom: '60px' }}>
+          <Link to="/portfolio" style={{ textDecoration: 'none', color: '#666', fontSize: '14px', borderBottom: '1px solid #ccc', paddingBottom: '2px' }}>
+            ← Back to Portfolio
+          </Link>
+        </div>
+        
+        <h1 style={{ fontSize: '32px', fontWeight: '600', marginBottom: '12px', letterSpacing: '-0.5px' }}>{project.title}</h1>
+        <p style={{ fontSize: '18px', color: '#666', marginBottom: '40px', lineHeight: '1.5' }}>{project.description}</p>
+        
+        <div style={{ width: '100%', marginBottom: '40px', backgroundColor: '#f5f5f5' }}>
+           <img src={project.thumbnail} style={{ width: '100%', height: 'auto', display: 'block' }} alt="Cover" />
+        </div>
+
+        <div className="markdown-content" style={{ fontSize: '16px', lineHeight: '1.8', color: '#222' }}> 
+          <ReactMarkdown>{project.body}</ReactMarkdown>
+        </div>
+      </div>
+    </div>
+  );
+};
 // --- APP COMPONENT ---
+
 function App() {
+  // Lấy đường dẫn hiện tại
+  const location = useLocation();
+  const isPortfolioPage = location.pathname.startsWith('/portfolio');
   const [searchTerm, setSearchTerm] = useState('');
-  const [isMenuOpen, setIsMenuOpen] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(window.innerWidth > 768);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [selectedTag, setSelectedTag] = useState('All');
 
   const currentTheme = isDarkMode ? themes.dark : themes.light;
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  useEffect(() => {
+    const handleResize = () => setIsMenuOpen(window.innerWidth > 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
+  // Xử lý Bài viết Blog
   const posts = useMemo(() => {
     const loadedPosts = [];
     for (const path in mdModules) {
@@ -485,53 +714,83 @@ function App() {
     return loadedPosts;
   }, []);
 
+  // Xử lý Dự án Portfolio (MỚI THÊM)
+  const projects = useMemo(() => {
+    const loadedProjects = [];
+    for (const path in projectModules) {
+      const { attributes, body } = frontMatter(projectModules[path]);
+      loadedProjects.push({ slug: path.split('/').pop().replace('.md', ''), ...attributes, body });
+    }
+    return loadedProjects.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+  }, []);
+
   const allTags = useMemo(() => {
     const tags = new Set(['All']);
     posts.forEach(post => post.tags?.forEach(tag => tags.add(tag)));
     return Array.from(tags);
   }, [posts]);
 
+  // 1. NẾU LÀ TRANG PORTFOLIO -> CHỈ HIỂN THỊ GIAO DIỆN TRẮNG TINH
+// --- NẾU LÀ TRANG PORTFOLIO (TRẮNG TINH KHÔI) ---
+  if (isPortfolioPage) {
+    return (
+      <Routes>
+        <Route path="/portfolio" element={<HarithPortfolio projects={projects} />} />
+        <Route path="/portfolio/:slug" element={<HarithProjectDetail projects={projects} />} />
+      </Routes>
+    );
+  }
+
+  // --- NẾU LÀ TRANG BLOG BÌNH THƯỜNG ---
   return (
-     <div style={{ fontFamily: 'Inter, sans-serif', background: currentTheme.bg, height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', color: currentTheme.text }}>
-       <Header 
-          onSearch={setSearchTerm} 
-          searchTerm={searchTerm} 
-          toggleMenu={() => setIsMenuOpen(!isMenuOpen)} 
-          theme={currentTheme}
-          toggleTheme={toggleTheme}
-          isDarkMode={isDarkMode}
-          allTags={allTags}
-          onSelectTag={setSelectedTag}
-       />
-       
-       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-         <Sidebar 
-            isOpen={isMenuOpen} 
-            theme={currentTheme} 
-            isDarkMode={isDarkMode} 
-            toggleTheme={toggleTheme} 
-            allTags={allTags}
-            selectedTag={selectedTag}
-            onSelectTag={setSelectedTag}
-         />
-         
-         <Routes>
-           <Route path="/" element={
-              <HomePage 
-                posts={posts} 
-                searchTerm={searchTerm} 
-                theme={currentTheme} 
-                selectedTag={selectedTag}
-              />
-            } />
-           <Route path="/post/:slug" element={<PostDetail posts={posts} theme={currentTheme} />} />
-           <Route path="/author/:authorName" element={<AuthorPage posts={posts} theme={currentTheme} />} />
-         </Routes>
-       </div>
-     </div>
+    // BẮT ĐẦU CÁI HỘP LỚN NHẤT GÓI TẤT CẢ LẠI (GIẢI QUYẾT LỖI)
+    <div style={{ background: currentTheme?.bg, height: '100vh', display: 'flex', flexDirection: 'column', color: currentTheme?.text }}>
+      
+      {/* 1. Thanh Header phía trên */}
+      <Header 
+        toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+        searchTerm={searchTerm} 
+        setSearchTerm={setSearchTerm} 
+        theme={currentTheme} 
+        toggleTheme={toggleTheme} 
+      />
+
+      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        {/* 2. Thanh Sidebar bên trái */}
+        <Sidebar isOpen={isSidebarOpen} theme={currentTheme} allTags={allTags}/>
+        
+        {/* 3. Phần nội dung chính (Chứa các Routes) */}
+        <main style={{ flex: 1, overflowY: 'auto' }}>
+          <Routes>
+            {/* Tuyến đường cho Trang chủ */}
+            <Route 
+              path="/" 
+              element={
+                <HomePage 
+                  posts={posts} 
+                  searchTerm={searchTerm} 
+                  theme={currentTheme} 
+                  selectedTag={selectedTag} 
+                />
+              } 
+            /> 
+
+            {/* Tuyến đường cho Bài viết chi tiết */}
+            <Route 
+              path="/post/:slug" 
+              element={<PostDetail posts={posts} theme={currentTheme} />} 
+            />
+          </Routes>
+        </main>
+      </div>
+
+    </div> 
+    // KẾT THÚC CÁI HỘP LỚN NHẤT
   );
-}
+} // <--- Đóng ngoặc của function App()
+
 
 export default function Root() {
   return <BrowserRouter><App /></BrowserRouter>
 }
+
