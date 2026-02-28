@@ -59,7 +59,3 @@ typings/
 # Build folder
 dist/
 build/
-#
-node_modules
-.env
-dist
