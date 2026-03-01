@@ -742,53 +742,47 @@ function App() {
   }
 
   // --- NẾU LÀ TRANG BLOG BÌNH THƯỜNG ---
+ // --- NẾU LÀ TRANG BLOG BÌNH THƯỜNG ---
   return (
-    // BẮT ĐẦU CÁI HỘP LỚN NHẤT GÓI TẤT CẢ LẠI (GIẢI QUYẾT LỖI)
+    // BẮT ĐẦU CÁI HỘP LỚN NHẤT GÓI TẤT CẢ LẠI
     <div style={{ background: currentTheme?.bg, height: '100vh', display: 'flex', flexDirection: 'column', color: currentTheme?.text }}>
       
-      {/* 1. Thanh Header phía trên */}
+      {/* 1. THANH HEADER: Đã nối lại đúng mạch điện */}
       <Header 
-        toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+        onSearch={setSearchTerm} 
         searchTerm={searchTerm} 
-        setSearchTerm={setSearchTerm} 
-        theme={currentTheme} 
-        toggleTheme={toggleTheme} 
+        toggleMenu={() => setIsSidebarOpen(!isSidebarOpen)} 
+        toggleTheme={toggleTheme}
+        isDarkMode={isDarkMode}
+        allTags={allTags}
+        onSelectTag={setSelectedTag}
       />
 
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* 2. Thanh Sidebar bên trái */}
-        <Sidebar isOpen={isSidebarOpen} theme={currentTheme} allTags={allTags}/>
         
-        {/* 3. Phần nội dung chính (Chứa các Routes) */}
+        {/* 2. THANH SIDEBAR: Đã cấp đủ dữ liệu chủ đề */}
+        <Sidebar 
+          isOpen={isSidebarOpen} 
+          theme={currentTheme} 
+          isDarkMode={isDarkMode}
+          toggleTheme={toggleTheme}
+          allTags={allTags}
+          selectedTag={selectedTag}
+          onSelectTag={setSelectedTag}
+        />
+        
+        {/* 3. Phần nội dung chính (GIỮ NGUYÊN KHÔNG ĐỔI) */}
         <main style={{ flex: 1, overflowY: 'auto' }}>
           <Routes>
-            {/* Tuyến đường cho Trang chủ */}
-            <Route 
-              path="/" 
-              element={
-                <HomePage 
-                  posts={posts} 
-                  searchTerm={searchTerm} 
-                  theme={currentTheme} 
-                  selectedTag={selectedTag} 
-                />
-              } 
-            /> 
-
-            {/* Tuyến đường cho Bài viết chi tiết */}
-            <Route 
-              path="/post/:slug" 
-              element={<PostDetail posts={posts} theme={currentTheme} />} 
-            />
+            <Route path="/" element={ <HomePage posts={posts} searchTerm={searchTerm} theme={currentTheme} selectedTag={selectedTag} /> } /> 
+            <Route path="/post/:slug" element={<PostDetail posts={posts} theme={currentTheme} />} />
           </Routes>
         </main>
       </div>
 
     </div> 
-    // KẾT THÚC CÁI HỘP LỚN NHẤT
   );
-} // <--- Đóng ngoặc của function App()
-
+}
 
 export default function Root() {
   return <BrowserRouter><App /></BrowserRouter>
