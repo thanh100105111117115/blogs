@@ -710,7 +710,7 @@ const HarithPortfolio = ({ projects = [] }) => {
                 className={`pure-interactive-overlay ${isEven ? 'overlay-right' : 'overlay-left'}`}
                 style={{
                   /* 🌟 TRÊN MOBILE: Tăng độ sáng tấm nền bằng cách giảm alpha xuống 0.4 giúp lọt ảnh rõ ràng */
-                  backgroundColor: isMobile ? 'rgba(15, 15, 15, 0)' : 'rgba(15, 15, 15, 0.95)',
+                  backgroundColor: isMobile ? 'rgba(15, 15, 15, 0.4)' : 'rgba(15, 15, 15, 0.95)',
                   width: isMobile ? '100%' : '50vw', /* Ép full 100% chiều ngang trên điện thoại */
                   left: isMobile ? 0 : undefined,
                   right: isMobile ? 0 : undefined
