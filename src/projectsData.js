@@ -23,7 +23,7 @@ export const SIX_PROJECTS = [
             onerror="this.style.display='none'; console.error('Không tìm thấy file ảnh! Hãy kiểm tra lại thư mục public.');"
           />
           <p style="margin: 10px 0 0 0; font-size: 13px; color: #666; text-align: center; font-style: italic; font-family: sans-serif;">
-            Hình minh họa: Bảng phân cấp các mức độ Prompt Engineering áp dụng trong tác vụ học tập.
+            Hình minh họa: thao tác mở file với File Explorer.
           </p>
         </div>
         <div>
