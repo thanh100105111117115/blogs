@@ -685,20 +685,24 @@ const HarithPortfolio = ({ projects = [] }) => {
               
               {/* KHỐI ẢNH NỀN: Viết thẳng style vào đây để ảnh ĐỨNG YÊN và không bị trùng */}
               <div className="pure-image-canvas" style={{ width: '100%', height: '100%' }}>
-                <div 
-                  className="pure-bg-img" 
-                  style={{ 
-                    backgroundImage: `url(${project.bannerUrl || project.thumbnail || `/images/${index + 1}.png` || `/${index + 1}.png`})`,
-                    backgroundAttachment: 'fixed', // BÍ QUYẾT GIỮ ẢNH ĐỨNG IM NHƯ IN
-                    backgroundPosition: 'center',
-                    backgroundSize: 'cover',
-                    backgroundRepeat: 'no-repeat',
-                    border: 'none', /* Loại bỏ viền nếu có */
-                    outline: 'none', /* Loại bỏ đường outline nếu có */
-                    width: '100%',
-                    height: '100%'
-                  }}
-                />
+              {/* THAY THẾ ĐOẠN THẺ DIV CHỨA ẢNH NỀN BẰNG ĐOẠN NÀY */}
+              <div 
+                className="pure-bg-img" 
+                style={{ 
+                  backgroundImage: `url(${project.bannerUrl || project.thumbnail || `/images/${index + 1}.png` || `/${index + 1}.png`})`,
+                  
+                  /* 🌟 ĐÃ FIX: Trên PC thì 'fixed' tạo hiệu ứng, trên Mobile chuyển về 'scroll' để ảnh sắc nét, đúng tỉ lệ */
+                  backgroundAttachment: isMobile ? 'scroll' : 'fixed', 
+                  
+                  backgroundPosition: 'center',
+                  backgroundSize: 'cover',
+                  backgroundRepeat: 'no-repeat',
+                  border: 'none', 
+                  outline: 'none', 
+                  width: '100%',
+                  height: '100%'
+                }}
+              />
               </div>
 
               {/* LỚP PHỦ MỜ ĐEN: Di chuyển khi cuộn trang */}
